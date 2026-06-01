@@ -9,7 +9,8 @@ from .models import Restaurant
 def restaurant_list(request: HttpRequest):
     restaurants = Restaurant.objects.all().order_by("name")
     return render(
-        request, "restaurants/restaurant_list.html", {"restaurants": restaurants}
+        request, "restaurants/restaurant_list.html", {
+            "restaurants": restaurants}
     )
 
 
@@ -17,6 +18,7 @@ def add_restaurant(request: HttpRequest):
     if request.method == "POST":
         form = RestaurantForm(request.POST)
         if form.is_valid():
+            form.instance.created_by = request.user
             form.save()
             return redirect("restaurants:restaurant_list")
 

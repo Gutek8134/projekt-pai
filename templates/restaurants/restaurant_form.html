@@ -1,14 +1,22 @@
 {% extends 'restaurants/base.html' %}
 
 {% block content %}
-  <h2>{{ title }}</h2>
+  {% if user.is_authenticated %}
+    <h2>{{ title }}</h2>
 
-  <form method="post">
-    {% csrf_token %} {{ form.as_p }}
-    <button type="submit">{{ submit_text }}</button>
-  </form>
+    {% if user == restaurant.created_by %}
+      <form method="post">
+        {% csrf_token %} {{ form.as_p }}
+        <button type="submit">{{ submit_text }}</button>
+      </form>
+    {% else %}
+      <p>You are not the owner of this restaurant and can not make changes to it.</p>
+    {% endif %}
 
-  <p>
-    <a href="{% url 'restaurants:restaurant_list' %}">Return to list</a>
-  </p>
+    <p>
+      <a href="{% url 'restaurants:restaurant_list' %}">Return to list</a>
+    </p>
+  {% else %}
+    <p>You must log in to submit a new restaurant</p>
+  {% endif %}
 {% endblock %}
