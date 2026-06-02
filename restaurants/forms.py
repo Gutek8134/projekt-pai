@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Restaurant, RestaurantMenuType
+from .models import Restaurant, RestaurantMenuType, Review
 
 
 class RestaurantFilterForm(forms.Form):
@@ -17,3 +17,13 @@ class RestaurantForm(forms.ModelForm):
         model = Restaurant
         fields = ["name", "menu_type", "address",
                   "photo", "latitude", "longditude"]
+
+
+class CommentForm(forms.ModelForm):
+    rating = forms.IntegerField(label="Rating", min_value=0, max_value=10)
+    comment_text = forms.CharField(
+        label="Review Details", widget=forms.Textarea, required=False)
+
+    class Meta:
+        model = Review
+        fields = ["rating", "comment_text"]

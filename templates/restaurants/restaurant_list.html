@@ -11,7 +11,9 @@
   {% if restaurants %}
     <ul>
       {% for restaurant in restaurants %}
-        <li>{{ restaurant.name }} {{ restaurant.distance }}</li>
+        <li>
+          <img src="{{ restaurant.photo.url }}" alt="{{ restaurant.name }}" width="500" height="500" style="object-fit: contain;" /> {{ restaurant.name }} {{ restaurant.distance }}
+        </li>
       {% endfor %}
     </ul>
   {% else %}

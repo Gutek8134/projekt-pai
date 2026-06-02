@@ -1,0 +1,36 @@
+{% extends 'restaurants/base.html' %}
+{% block content %}
+  <img src="{{ restaurant.photo.url }}" alt="{{ restaurant.name }}" width="500" height="500" style="object-fit: contain;" />
+  <h1>{{ restaurant.name }}</h1>
+  <h2>Address</h2>
+  <h3>{{ restaurant.address }}</h3>
+  <h2>Menu</h2>
+  <h3>{{ restaurant.menu_type }}</h3>
+  <h6>Added by: {{ restaurant.created_by }}</h6>
+
+  <h2>Comments</h2>
+  <hr />
+  {% if reviews %}
+    <ul>
+      {% for review in reviews %}
+        <li>
+          <h4>{{ review.created_by }}</h4>
+          <h5>{{ review.rating }}/10</h5>
+          {% if review.comment_text %}
+            <p>{{ review.comment_text }}</p>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    Be the first to leave a review!
+  {% endif %}
+
+  {% if can_leave_a_comment %}
+    <form method="post">
+      {% csrf_token %}
+      {{ form }}
+      <button type="submit">Add review</button>
+    </form>
+  {% endif %}
+{% endblock %}

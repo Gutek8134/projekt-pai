@@ -10,7 +10,7 @@ class RestaurantMenuType(models.Model):
         max_length=50, verbose_name="Menu Type", unique=True)
 
     def __str__(self):
-        return repr(self.menu_type)
+        return self.menu_type
 
 
 class Restaurant(models.Model):
@@ -31,7 +31,7 @@ class Restaurant(models.Model):
         User, on_delete=models.PROTECT, verbose_name="Created by")
 
     def __str__(self):
-        return repr(self.name)
+        return self.name
 
     class Meta:
         unique_together = [[
@@ -43,7 +43,7 @@ class Review(models.Model):
     objects: Manager
     for_restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE)
     rating = models.IntegerField(verbose_name="Rating")
-    comment_text = models.TextField(verbose_name="Review Details")
+    comment_text = models.TextField(verbose_name="Review Details", blank=True)
     created_by = models.ForeignKey(
         User, on_delete=models.PROTECT, verbose_name="Created by")
 

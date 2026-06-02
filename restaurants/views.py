@@ -3,8 +3,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.db.models import F, FloatField
 from django.db.models.functions import Power, Sqrt, Radians, Sin, Cos, ATan2
 
-from .forms import RestaurantForm, RestaurantFilterForm
-from .models import Restaurant, RestaurantMenuType
+from .forms import RestaurantForm, RestaurantFilterForm, CommentForm
+from .models import Restaurant, RestaurantMenuType, Review
 
 from math import radians, cos
 
@@ -57,6 +57,37 @@ def restaurant_list(request: HttpRequest):
             "form": filter_form,
             "user_position": (USER_LATITUDE, USER_LONGDITUDE), }
     )
+
+
+def restaurant_details(request: HttpRequest, pk: int):
+    restaurant = get_object_or_404(Restaurant, pk=pk)
+    reviews = Review.objects.filter(for_restaurant=restaurant)
+
+    if request.method == "POST":
+        form = CommentForm(request.POST)
+        form.instance.for_restaurant = restaurant
+        form.instance.created_by = request.user
+
+        if form.is_valid():
+            form.save()
+
+    else:
+        form = CommentForm()
+
+    logged_in = request.user.is_authenticated
+    left_a_comment = False
+    if logged_in:
+        left_a_comment = reviews.filter(created_by=request.user).exists()
+    can_leave_a_comment = logged_in and not left_a_comment
+
+    return render(request,
+                  "restaurants/restaurant_details.html",
+                  {
+                      "restaurant": restaurant,
+                      "reviews": reviews,
+                      "can_leave_a_comment": can_leave_a_comment,
+                      "form": form
+                  })
 
 
 def add_restaurant(request: HttpRequest):
