@@ -1,0 +1,17 @@
+{% extends 'restaurants/base.html' %}
+
+{% block content %}
+  {% if user.is_authenticated %}
+    <h2>{{ title }}</h2>
+
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %} {{ form.as_p }}
+      <button type="submit">{{ submit_text }}</button>
+    </form>
+  {% else %}
+    <p>You must log in to submit a new restaurant</p>
+  {% endif %}
+  <p>
+    <a href="{% url 'restaurants:restaurant_list' %}">Return to list</a>
+  </p>
+{% endblock %}

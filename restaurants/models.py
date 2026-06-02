@@ -6,7 +6,8 @@ from django.contrib.auth.models import User
 # Create your models here.
 class RestaurantMenuType(models.Model):
     objects: Manager
-    menu_type = models.CharField(max_length=50, verbose_name="Menu Type")
+    menu_type = models.CharField(
+        max_length=50, verbose_name="Menu Type", unique=True)
 
     def __str__(self):
         return repr(self.menu_type)
@@ -19,7 +20,7 @@ class Restaurant(models.Model):
         RestaurantMenuType, on_delete=models.RESTRICT)
     address = models.CharField(
         max_length=255, verbose_name="Restaurant Address")
-    photo = models.ImageField(width_field="512", height_field="512")
+    photo = models.ImageField()
     latitude = models.DecimalField(
         max_digits=8, decimal_places=5, verbose_name="Restaurant Latitude"
     )

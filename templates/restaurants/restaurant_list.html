@@ -1,10 +1,17 @@
 {% extends 'restaurants/base.html' %}
 {% block content %}
+  <h4>Your position:</h4>
+  {{ user_position }}
+  <h2>Filters</h2>
+  <form method="get">
+    {{ form }}
+    <button type="submit">Filter</button>
+  </form>
   <h2>Restaurants list</h2>
   {% if restaurants %}
     <ul>
       {% for restaurant in restaurants %}
-        <li>{{ restaurant.name }}</li>
+        <li>{{ restaurant.name }} {{ restaurant.distance }}</li>
       {% endfor %}
     </ul>
   {% else %}
