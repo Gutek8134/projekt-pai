@@ -27,3 +27,8 @@ class CommentForm(forms.ModelForm):
     class Meta:
         model = Review
         fields = ["rating", "comment_text"]
+
+
+class CommentFilterForm(forms.Form):
+    comment_text = forms.CharField(
+        label="Review Details", required=True)

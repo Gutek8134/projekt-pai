@@ -15,6 +15,7 @@
       <h1>Restaurants</h1>
       <nav>
         <a href="{% url 'restaurants:restaurant_list' %}">Restaurant list</a>
+        <a href="{% url 'restaurants:search_reviews' %}">Search for review</a>
         {% if user.is_authenticated %}
           <a href="{% url 'restaurants:add_restaurant' %}">Add restaurant</a>
           <a href="{% url 'password_change' %}">Change password</a>

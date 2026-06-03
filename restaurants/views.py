@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.db.models import F, FloatField, Avg
 from django.db.models.functions import Power, Sqrt, Radians, Sin, Cos, ATan2
 
-from .forms import RestaurantForm, RestaurantFilterForm, CommentForm
+from .forms import RestaurantForm, RestaurantFilterForm, CommentForm, CommentFilterForm
 from .models import Restaurant, Review
 
 from math import radians, cos
@@ -25,7 +25,7 @@ def restaurant_list(request: HttpRequest):
     if request.method == "GET":
         filter_form = RestaurantFilterForm(request.GET)
         if "name" in request.GET:
-            restaurants = restaurants.filter(name__icontains=filter_form.name)\
+            restaurants = restaurants.filter(name__icontains=filter_form.data['name'])\
                 .annotate(distance_latitude_r=Radians(F("latitude")-USER_LATITUDE, output_field=FloatField()), distance_longditude_r=Radians(F("longditude")-USER_LONGDITUDE, output_field=FloatField()))\
                 .annotate(a=Power(Sin(F("distance_latitude_r")/2), 2, output_field=FloatField()) +
                           cos(radians(USER_LATITUDE))*Cos(Radians(F("latitude")), output_field=FloatField()) *
@@ -36,13 +36,13 @@ def restaurant_list(request: HttpRequest):
         if "max_distance" in request.GET and request.GET["max_distance"].replace(".", "", 1).isdigit():
             try:
                 restaurants = restaurants\
-                    .filter(distance__lte=filter_form.max_distance)
+                    .filter(distance__lte=filter_form.data['max_distance'])
             except ValueError as e:
                 print(e)
 
         if "menu_types" in request.GET:
             restaurants = restaurants.filter(
-                menu_type__in=filter_form.menu_types)
+                menu_type__in=filter_form.data['menu_types'])
 
     else:
         filter_form = RestaurantFilterForm()
@@ -162,4 +162,18 @@ def delete_review(request: HttpRequest, pk: int):
         request,
         "restaurants/confirm_delete_review.html",
         {"review": review, "goto": goto},
+    )
+
+
+def search_reviews(request: HttpRequest):
+    reviews = Review.objects.none()
+    form = CommentFilterForm(request.GET)
+    if form.is_valid():
+        reviews = Review.objects.filter(
+            comment_text__icontains=form.data['comment_text'])
+
+    return render(
+        request,
+        "restaurants/search_review.html",
+        {"form": form, "reviews": reviews}
     )
