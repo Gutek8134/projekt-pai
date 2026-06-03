@@ -1,10 +1,10 @@
 from django.http import HttpRequest
 from django.shortcuts import get_object_or_404, redirect, render
-from django.db.models import F, FloatField
+from django.db.models import F, FloatField, Avg
 from django.db.models.functions import Power, Sqrt, Radians, Sin, Cos, ATan2
 
 from .forms import RestaurantForm, RestaurantFilterForm, CommentForm
-from .models import Restaurant, RestaurantMenuType, Review
+from .models import Restaurant, Review
 
 from math import radians, cos
 
@@ -17,17 +17,15 @@ USER_LONGDITUDE = 16.92993
 
 def restaurant_list(request: HttpRequest):
     restaurants = Restaurant.objects.all()
-    menu_types: list[str] = list(
-        RestaurantMenuType.objects.values_list("menu_type", flat=True))
-
-    restaurant_name = ""
-    max_distance = ""
+    average_ratings = {}
+    for restaurant in restaurants:
+        average_ratings[restaurant.pk] = Review.objects.filter(
+            for_restaurant=restaurant).aggregate(Avg("rating"))['rating__avg']
 
     if request.method == "GET":
         filter_form = RestaurantFilterForm(request.GET)
         if "name" in request.GET:
-            restaurant_name = request.GET["name"]
-            restaurants = restaurants.filter(name__icontains=restaurant_name)\
+            restaurants = restaurants.filter(name__icontains=filter_form.name)\
                 .annotate(distance_latitude_r=Radians(F("latitude")-USER_LATITUDE, output_field=FloatField()), distance_longditude_r=Radians(F("longditude")-USER_LONGDITUDE, output_field=FloatField()))\
                 .annotate(a=Power(Sin(F("distance_latitude_r")/2), 2, output_field=FloatField()) +
                           cos(radians(USER_LATITUDE))*Cos(Radians(F("latitude")), output_field=FloatField()) *
@@ -37,15 +35,14 @@ def restaurant_list(request: HttpRequest):
 
         if "max_distance" in request.GET and request.GET["max_distance"].replace(".", "", 1).isdigit():
             try:
-                max_distance = float(request.GET["max_distance"])
                 restaurants = restaurants\
-                    .filter(distance__lte=max_distance)
+                    .filter(distance__lte=filter_form.max_distance)
             except ValueError as e:
                 print(e)
 
         if "menu_types" in request.GET:
             restaurants = restaurants.filter(
-                menu_type__in=request.GET["menu_types"])
+                menu_type__in=filter_form.menu_types)
 
     else:
         filter_form = RestaurantFilterForm()
@@ -54,6 +51,7 @@ def restaurant_list(request: HttpRequest):
     return render(
         request, "restaurants/restaurant_list.html", {
             "restaurants": restaurants,
+            "average_ratings": average_ratings,
             "form": filter_form,
             "user_position": (USER_LATITUDE, USER_LONGDITUDE), }
     )
@@ -62,6 +60,7 @@ def restaurant_list(request: HttpRequest):
 def restaurant_details(request: HttpRequest, pk: int):
     restaurant = get_object_or_404(Restaurant, pk=pk)
     reviews = Review.objects.filter(for_restaurant=restaurant)
+    average_rating = reviews.aggregate(Avg("rating"))['rating__avg']
 
     if request.method == "POST":
         form = CommentForm(request.POST)
@@ -85,6 +84,7 @@ def restaurant_details(request: HttpRequest, pk: int):
                   {
                       "restaurant": restaurant,
                       "reviews": reviews,
+                      "average_rating": average_rating,
                       "can_leave_a_comment": can_leave_a_comment,
                       "form": form
                   })
@@ -136,6 +136,7 @@ def edit_restaurant(request: HttpRequest, pk: int):
 
 def delete_restaurant(request: HttpRequest, pk: int):
     restaurant = get_object_or_404(Restaurant, pk=pk)
+    goto = request.GET.get("goto", "restaurants:restaurant_list")
 
     if request.method == "POST":
         restaurant.delete()
@@ -144,5 +145,20 @@ def delete_restaurant(request: HttpRequest, pk: int):
     return render(
         request,
         "restaurants/confirm_delete_restaurant.html",
-        {"restaurant": restaurant},
+        {"restaurant": restaurant, "goto": goto},
+    )
+
+
+def delete_review(request: HttpRequest, pk: int):
+    review = get_object_or_404(Review, pk=pk)
+    goto = request.GET.get("goto", "restaurants:restaurant_list")
+
+    if request.method == "POST":
+        review.delete()
+        return redirect(goto)
+
+    return render(
+        request,
+        "restaurants/confirm_delete_review.html",
+        {"review": review, "goto": goto},
     )

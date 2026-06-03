@@ -14,4 +14,6 @@ urlpatterns = [
          name=views.edit_restaurant.__name__),
     path("delete/<int:pk>", views.delete_restaurant,
          name=views.delete_restaurant.__name__),
+    path("delete_review/<int:pk>", views.delete_review,
+         name=views.delete_review.__name__),
 ]

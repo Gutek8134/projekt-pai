@@ -3,9 +3,12 @@
   {% if user.is_authenticated %}
     <h2>Delete restaurant</h2>
 
-    <p>
-      Are you sure you want to delete restaurant <strong>{{ restaurant.name }}</strong>?
-    </p>
+    <p>Are you sure you want to delete review?</p>
+    <h4>{{ review.created_by }}</h4>
+    <h5>{{ review.rating }}/10</h5>
+    {% if review.comment_text %}
+      <p>{{ review.comment_text }}</p>
+    {% endif %}
 
     <form method="post">
       {% csrf_token %}
