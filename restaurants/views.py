@@ -139,6 +139,7 @@ def delete_restaurant(request: HttpRequest, pk: int):
     goto = request.GET.get("goto", "restaurants:restaurant_list")
 
     if request.method == "POST":
+        Review.objects.filter(for_restaurant=restaurant).delete()
         restaurant.delete()
         return redirect("restaurants:restaurant_list")
 
