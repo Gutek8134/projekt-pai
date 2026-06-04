@@ -1,22 +1,42 @@
 {% extends 'restaurants/base.html' %}
+{% load access_dict %}
 {% block content %}
-  <h4>Your position:</h4>
-  {{ user_position }}
-  <h2>Filters</h2>
-  <form method="get">
-    {{ form }}
-    <button type="submit">Filter</button>
-  </form>
-  <h2>Restaurants list</h2>
-  {% if restaurants %}
-    <ul>
-      {% for restaurant in restaurants %}
-        <li>
-          <img src="{{ restaurant.photo.url }}" alt="{{ restaurant.name }}" width="500" height="500" style="object-fit: contain;" /> {{ restaurant.name }} {{ restaurant.distance }}
-        </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p>No restaurants for now</p>
-  {% endif %}
+  <div class="row">
+    <div style="width: 25vw;">
+      <h4>Your position:</h4>
+      {{ user_position }}
+      <div id="filters">
+        <h2>Filters</h2>
+        <form method="get">
+          {{ form.as_p }}
+          <button type="submit">Filter</button>
+        </form>
+      </div>
+    </div>
+    <div style="width: 60vw;">
+      <h2>Restaurants list</h2>
+      <div class="restaurants">
+        {% if restaurants %}
+          {% for restaurant in restaurants %}
+            <a href="{% url 'restaurants:restaurant_details' pk=restaurant.pk %}">
+              <div class="restaurant">
+                <img src="{{ restaurant.photo.url }}" alt="{{ restaurant.name }}" /> <br />
+                {{ restaurant.name }} <br />
+                Menu: {{ restaurant.menu_type }} <br />
+                {% if average_ratings|access_dict:restaurant.pk != None %}
+                  Average rating: {{ average_ratings|access_dict:restaurant.pk|floatformat:1 }}/10 <br />
+                {% else %}
+                  No reviews <br />
+                {% endif %}Address: {{ restaurant.address }} <br />
+                Coordinates: ({{ restaurant.latitude }}, {{ restaurant.longditude }}) <br />
+                {{ restaurant.distance|floatformat:2 }} km away from you <br />
+              </div>
+            </a>
+          {% endfor %}
+        {% else %}
+          <p>No restaurants for now</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
 {% endblock %}

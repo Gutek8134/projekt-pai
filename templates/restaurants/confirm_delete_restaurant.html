@@ -1,20 +1,24 @@
 {% extends 'restaurants/base.html' %}
 {% block content %}
   {% if user.is_authenticated %}
-    <h2>Delete restaurant</h2>
+    {% if user == restaurant.created_by %}
+      <h2>Delete restaurant</h2>
 
-    <p>
-      Are you sure you want to delete restaurant <strong>{{ restaurant.name }}</strong>?
-    </p>
+      <p>
+        Are you sure you want to delete restaurant <strong>{{ restaurant.name }}</strong>?
+      </p>
 
-    <form method="post">
-      {% csrf_token %}
-      <button type="submit">Yes, delete</button>
-    </form>
+      <form method="post">
+        {% csrf_token %}
+        <button type="submit">Yes, delete</button>
+      </form>
 
-    <p>
-      <a href="{{ goto }}">No, go back</a>
-    </p>
+      <p>
+        <a href="{{ goto }}">No, go back</a>
+      </p>
+    {% else %}
+      <p>You are not the creator of this restaurant</p>
+    {% endif %}
   {% else %}
     <p>You must be logged in to delete a restaurant</p>
   {% endif %}

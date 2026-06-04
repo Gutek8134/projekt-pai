@@ -1,24 +1,28 @@
 {% extends 'restaurants/base.html' %}
 {% block content %}
   {% if user.is_authenticated %}
-    <h2>Delete restaurant</h2>
+    {% if user == review.created_by %}
+      <h2>Delete review</h2>
 
-    <p>Are you sure you want to delete review?</p>
-    <h4>{{ review.created_by }}</h4>
-    <h5>{{ review.rating }}/10</h5>
-    {% if review.comment_text %}
-      <p>{{ review.comment_text }}</p>
+      <p>Are you sure you want to delete review?</p>
+      <h4>{{ review.created_by }}</h4>
+      <h5>{{ review.rating }}/10</h5>
+      {% if review.comment_text %}
+        <p>{{ review.comment_text }}</p>
+      {% endif %}
+
+      <form method="post">
+        {% csrf_token %}
+        <button type="submit">Yes, delete</button>
+      </form>
+
+      <p>
+        <a href="{{ goto }}">No, go back</a>
+      </p>
+    {% else %}
+      <p>You are not the creator of this review</p>
     {% endif %}
-
-    <form method="post">
-      {% csrf_token %}
-      <button type="submit">Yes, delete</button>
-    </form>
-
-    <p>
-      <a href="{{ goto }}">No, go back</a>
-    </p>
   {% else %}
-    <p>You must be logged in to delete a restaurant</p>
+    <p>You must be logged in to delete a review</p>
   {% endif %}
 {% endblock %}

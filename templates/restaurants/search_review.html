@@ -1,20 +1,24 @@
 {% extends 'restaurants/base.html' %}
 {% block content %}
-  <form>
-    {{ form }}
-    <button type="submit">Search</button>
-  </form>
+  {% if user.is_authenticated %}
+    <form>
+      {{ form }}
+      <button type="submit">Search</button>
+    </form>
 
-  <ul>
-    {% for review in reviews %}
-      <li>
-        <h4>{{ review.created_by }}</h4>
-        <h5>{{ review.rating }}/10</h5>
-        {% if review.comment_text %}
-          <p>{{ review.comment_text }}</p>
-        {% endif %}
-        <a href="{% url 'restaurants:restaurant_details' pk=review.for_restaurant.pk %}">Go to restaurant</a>
-      </li>
-    {% endfor %}
-  </ul>
+    <ul>
+      {% for review in reviews %}
+        <li>
+          <h4>{{ review.created_by }}</h4>
+          <h5>{{ review.rating }}/10</h5>
+          {% if review.comment_text %}
+            <p>{{ review.comment_text }}</p>
+          {% endif %}
+          <a href="{% url 'restaurants:restaurant_details' pk=review.for_restaurant.pk %}">Go to restaurant</a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    You must be logged in to search the reviews.
+  {% endif %}
 {% endblock %}

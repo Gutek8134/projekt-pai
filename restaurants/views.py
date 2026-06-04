@@ -16,7 +16,13 @@ USER_LONGDITUDE = 16.92993
 
 
 def restaurant_list(request: HttpRequest):
-    restaurants = Restaurant.objects.all()
+    restaurants = Restaurant.objects.all()\
+        .annotate(distance_latitude_r=Radians(F("latitude")-USER_LATITUDE, output_field=FloatField()), distance_longditude_r=Radians(F("longditude")-USER_LONGDITUDE, output_field=FloatField()))\
+        .annotate(a=Power(Sin(F("distance_latitude_r")/2), 2, output_field=FloatField()) +
+                  cos(radians(USER_LATITUDE))*Cos(Radians(F("latitude")), output_field=FloatField()) *
+                  Power(Sin(F("distance_longditude_r")/2), 2, output_field=FloatField()))\
+        .annotate(c=2*ATan2(Sqrt(F("a")), Sqrt(1-F("a")), output_field=FloatField()))\
+        .annotate(distance=RADIUS*F("c"))
     average_ratings = {}
     for restaurant in restaurants:
         average_ratings[restaurant.pk] = Review.objects.filter(
@@ -25,13 +31,8 @@ def restaurant_list(request: HttpRequest):
     if request.method == "GET":
         filter_form = RestaurantFilterForm(request.GET)
         if "name" in request.GET:
-            restaurants = restaurants.filter(name__icontains=filter_form.data['name'])\
-                .annotate(distance_latitude_r=Radians(F("latitude")-USER_LATITUDE, output_field=FloatField()), distance_longditude_r=Radians(F("longditude")-USER_LONGDITUDE, output_field=FloatField()))\
-                .annotate(a=Power(Sin(F("distance_latitude_r")/2), 2, output_field=FloatField()) +
-                          cos(radians(USER_LATITUDE))*Cos(Radians(F("latitude")), output_field=FloatField()) *
-                          Power(Sin(F("distance_longditude_r")/2), 2, output_field=FloatField()))\
-                .annotate(c=2*ATan2(Sqrt(F("a")), Sqrt(1-F("a")), output_field=FloatField()))\
-                .annotate(distance=RADIUS*F("c"))
+            restaurants = restaurants.filter(
+                name__icontains=filter_form.data['name'])
 
         if "max_distance" in request.GET and request.GET["max_distance"].replace(".", "", 1).isdigit():
             try:

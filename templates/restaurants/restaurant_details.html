@@ -1,20 +1,26 @@
 {% extends 'restaurants/base.html' %}
 {% block content %}
-  <img src="{{ restaurant.photo.url }}" alt="{{ restaurant.name }}" width="500" height="500" style="object-fit: contain;" />
-  <h1>{{ restaurant.name }}</h1>
-  {% if average_rating != None %}
-    {{ average_rating }}/10
-  {% endif %}
-  <h2>Address</h2>
-  <h3>{{ restaurant.address }}</h3>
-  <h2>Menu</h2>
-  <h3>{{ restaurant.menu_type }}</h3>
-  <h6>Added by: {{ restaurant.created_by }}</h6>
+  <div class="row">
+    <div style="width: fit-content;">
+      <h1>{{ restaurant.name }}</h1><br />
+      {% if average_rating != None %}
+        <h2>Average Rating</h2>
+        <h3>{{ average_rating }}/10</h3><br />
+      {% endif %}
+      <h2>Address</h2>
+      <h3>{{ restaurant.address }}</h3><br />
+      <h2>Menu</h2>
+      <h3>{{ restaurant.menu_type }}</h3><br />
+    </div>
+    <div style="width: fit-content;">
+      <img class="big-image" src="{{ restaurant.photo.url }}" alt="{{ restaurant.name }}" />
 
-  {% if restaurant.created_by == user %}
-    <a href="{% url 'restaurants:delete_restaurant' pk=restaurant.pk %}?goto={{ request.get_full_path }}"><button type="button">Delete restaurant</button></a>
-  {% endif %}
-
+      <h6>Added by: {{ restaurant.created_by }}</h6>
+      {% if restaurant.created_by == user %}
+        <a href="{% url 'restaurants:delete_restaurant' pk=restaurant.pk %}?goto={{ request.get_full_path }}"><button type="button">Delete restaurant</button></a>
+      {% endif %}
+    </div>
+  </div>
   <h2>Comments</h2>
   <hr />
   {% if reviews %}
